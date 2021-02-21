@@ -5,41 +5,37 @@ import Scroll from "../components/Scroll";
 import "./App.css";
 
 import { connect } from "react-redux";
-import { setSearchField } from "../actions";
+import { requestRobots, setSearchField } from "../actions";
 
 const mapStateToProps = (state) => ({
-  searchField: state.searchField, //comes from our root reducer when we initialized store
+  //comes from our root reducer when we initialized store
+  //searchField state gets 
+  searchField: state.searchRobots.searchField,
+  robots: state.requestRobots.robots,
+  isPending: state.requestRobots.isPending,
+  error: state.requestRobots.error
 });
 
 //what triggers the action
 const mapDispatchToProps = (dispatch) => ({
   onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+  onRequestRobots: () => requestRobots()(dispatch)
 });
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      robots: []
-    };
-  }
 
   componentDidMount() {
-    console.log(this.props);
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((users) => {
-        this.setState({ robots: users });
-      });
+    // console.log(this.props);
+    this.props.onRequestRobots();
+
   }
 
   render() {
-    const { robots } = this.state;
-    const {searchField, onSearchChange} = this.props;
+    const {searchField, onSearchChange, robots, isPending} = this.props;
     const filteredRobots = robots.filter((robot) => {
       return robot.name.toLowerCase().includes(searchField.toLowerCase());
     });
-    return !robots.length ? (
+    return isPending ? (
       <h1>Loading</h1>
     ) : (
       <div className="tc">
